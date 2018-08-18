@@ -1,0 +1,83 @@
+version: 2
+
+.templates:
+  - restore_cache: &restore_cache
+      key: v1-dependency-cache-{{ checksum "setup.py" }}
+
+  - save_cache: &save_cache
+      key: v1-dependency-cache-{{ checksum "setup.py" }}
+      paths:
+        - "venv"
+
+  - python_deps: &python_deps
+      name: install python dependencies
+      command: |
+        python3 -m venv venv
+        . venv/bin/activate
+        pip install twine
+        pip install -e .
+
+jobs:
+  build:
+    docker:
+      - image: circleci/python:3.6
+    steps:
+      - checkout
+
+      - restore_cache: *restore_cache
+      - run: *python_deps
+      - save_cache: *save_cache
+
+      - store_artifacts:
+          path: dist/**
+
+  deploy:
+    docker:
+      - image: circleci/python:3.6
+    steps:
+      - checkout
+
+      - restore_cache: *restore_cache
+      - run: *python_deps
+      - save_cache: *save_cache
+
+      - run:
+          name: create packages
+          command: |
+            python setup.py sdist bdist_wheel
+
+      - run:
+          name: upload to pypi
+          command: |
+            . venv/bin/activate
+            if [ "${PYPI_REPOSITORY_URL}x" != "x" ]; then export repository_url="--repository-url ${PYPI_REPOSITORY_URL}" ; fi
+            twine upload ${repository_url} dist/*
+
+workflows:
+  version: 2
+
+  build_and_deploy_dev:
+    jobs:
+      - build
+      - deploy:
+          context: dev
+          requires:
+            - build
+
+  build_and_deploy_prod:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*/
+            branches:
+              ignore: /^(?!master).+@/
+      - deploy:
+          context: production
+          requires:
+            - build
+          filters:
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*/
+            branches:
+              ignore: /^(?!master).+@/
