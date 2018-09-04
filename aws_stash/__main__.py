@@ -8,8 +8,8 @@ from aws_stash import __project_name__, __version__
 
 import sys
 
-from ParamStore import ParamStore
-from Output import Output
+from aws_stash.ParamStore import ParamStore
+from aws_stash.Output import Output
 
 
 def main():
