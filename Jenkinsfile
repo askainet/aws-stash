@@ -23,7 +23,7 @@ podTemplate(label: 'mypod', containers: [
                 sh """
                     pip install -r requirements.txt
                     pytest -v
-                """
+                   """
             }
         }
 
