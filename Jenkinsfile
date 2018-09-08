@@ -21,17 +21,15 @@ podTemplate(label: 'mypod', containers: [
         stage('Python test') {
             container('python') {
                 sh """
-                pip install -r requirements.txt
-                pytest -v
+                    pip install -r requirements.txt
+                    pytest -v
                 """
             }
         }
 
         stage('Python build') {
             container('python') {
-                dir('aws-stash/') {
-                    sh "pip install ."
-                }
+                sh "pip install ."
             }
         }
     }
