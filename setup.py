@@ -8,7 +8,10 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="aws-stash",
-    setup_requires=['setuptools_scm'],
+    setup_requires=[
+        'setuptools_scm',
+        'moto'
+    ],
     use_scm_version={
         'version_scheme': 'guess-next-dev',
         'local_scheme': 'dirty-tag'
@@ -33,5 +36,6 @@ setuptools.setup(
     install_requires=[
         'boto3>=1.7.38',
         'pyperclip==1.6.4'
-    ]
+    ],
+    test_suite='tests'
 )

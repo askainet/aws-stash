@@ -165,3 +165,4 @@ class ParamStore:
             )
             print('Deleted parameters: {0}'.format(response['DeletedParameters']))
             print('Invalid parameters: {0}'.format(response['InvalidParameters']))
+            return response['DeletedParameters']
