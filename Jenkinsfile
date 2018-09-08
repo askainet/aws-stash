@@ -9,19 +9,22 @@ podTemplate(label: 'mypod', containers: [
   ]
   ) {
     node('mypod') {
+
+        def myRepo = checkout scm
+
         stage('Check running containers') {
             container('docker') {
-                sh 'docker ps'
+                sh "docker ps"
             }
         }
 
         stage('Python test') {
             container('python') {
                 dir('aws-stash/') {
-                    sh '''
-                    pip install -r requirements.txt'
+                    sh """
+                    pip install -r requirements.txt
                     pytest -v
-                    '''
+                    """
                 }
             }
         }
@@ -29,7 +32,7 @@ podTemplate(label: 'mypod', containers: [
         stage('Python build') {
             container('python') {
                 dir('aws-stash/') {
-                    sh 'pip install .'
+                    sh "pip install ."
                 }
             }
         }
