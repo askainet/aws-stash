@@ -36,11 +36,11 @@ podTemplate(label: 'aws-stash', containers: [
         stage('Docker image') {
             container('docker') {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
-                    sh 'docker login -u ${DOCKER_HUB_USER} -p ${DOCKER_HUB_PASSWORD}'
+                    // sh 'docker login -u ${DOCKER_HUB_USER} -p ${DOCKER_HUB_PASSWORD}'
                     sh """
-                        docker pull ${dockerNamespace}/${dockerImage} || true
+                        # docker pull ${dockerNamespace}/${dockerImage} || true
                         docker build --cache-from=${dockerNamespace}/${dockerImage} -t ${dockerNamespace}/${dockerImage}:${gitCommit} .
-                        docker push ${dockerNamespace}/${dockerImage}:${gitCommit}
+                        # docker push ${dockerNamespace}/${dockerImage}:${gitCommit}
                     """
                 }
             }
