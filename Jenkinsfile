@@ -40,7 +40,7 @@ podTemplate(label: 'mypod', containers: [
                     usernameVariable: 'DOCKER_HUB_USER',
                     passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
                     sh """
-                        docker login -u '${DOCKER_HUB_USER}' -p '${DOCKER_HUB_PASSWORD}'
+                        docker login -u \\\'${DOCKER_HUB_USER}\\\' -p \\\'${DOCKER_HUB_PASSWORD}\\\'
                         docker pull ${dockerNamespace}/${dockerImage} || true
                         docker build --cache-from=${dockerNamespace}/${dockerImage} -t ${dockerNamespace}/${dockerImage}:${gitCommit} .
                         docker push ${dockerNamespace}/${dockerImage}:${gitCommit}
