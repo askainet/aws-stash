@@ -39,8 +39,9 @@ podTemplate(label: 'aws-stash', containers: [
                     // sh 'docker login -u ${DOCKER_HUB_USER} -p ${DOCKER_HUB_PASSWORD}'
                     sh """
                         # docker pull ${dockerNamespace}/${dockerImage} || true
-                        docker build --cache-from=${dockerNamespace}/${dockerImage} -t ${dockerNamespace}/${dockerImage}:${gitCommit} .
-                        # docker push ${dockerNamespace}/${dockerImage}:${gitCommit}
+                        # docker build --cache-from=${dockerNamespace}/${dockerImage} -t ${dockerNamespace}/${dockerImage}:${shortGitCommit} .
+                        docker build -t ${dockerNamespace}/${dockerImage}:${shortGitCommit} .
+                        # docker push ${dockerNamespace}/${dockerImage}:${shortGitCommit}
                     """
                 }
             }
