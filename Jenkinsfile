@@ -33,7 +33,7 @@ podTemplate(label: 'mypod', containers: [
             }
         }
 
-        stage('Check running containers') {
+        stage('Docker image') {
             container('docker') {
                 withCredentials([[$class: 'UsernamePasswordMultiBinding',
                     credentialsId: 'dockerhub',
@@ -41,7 +41,7 @@ podTemplate(label: 'mypod', containers: [
                     passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
                     sh """
                         docker login -u ${DOCKER_HUB_USER} -p ${DOCKER_HUB_PASSWORD}
-                        docker pull ${dockerNamespace}/${dockerImage}
+                        docker pull ${dockerNamespace}/${dockerImage} || true
                         docker build --cache-from=${dockerNamespace}/${dockerImage} -t ${dockerNamespace}/${dockerImage}:${gitCommit} .
                         docker push ${dockerNamespace}/${dockerImage}:${gitCommit}
                     """
