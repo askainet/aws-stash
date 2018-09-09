@@ -35,10 +35,7 @@ podTemplate(label: 'mypod', containers: [
 
         stage('Docker image') {
             container('docker') {
-                withCredentials([[$class: 'UsernamePasswordMultiBinding',
-                    credentialsId: 'dockerhub',
-                    usernameVariable: 'DOCKER_HUB_USER',
-                    passwordVariable: 'DOCKER_HUB_PASSWORD']]) {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_HUB_USER', passwordVariable: 'DOCKER_HUB_PASSWORD')]) {
                     sh 'docker login -u ${DOCKER_HUB_USER} -p ${DOCKER_HUB_PASSWORD}'
                     sh """
                         docker pull ${dockerNamespace}/${dockerImage} || true
