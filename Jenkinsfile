@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-podTemplate(label: 'mypod', containers: [
+podTemplate(label: 'aws-stash', containers: [
     containerTemplate(name: 'python', image: 'python:3.6', command: 'cat', ttyEnabled: true),
     containerTemplate(name: 'docker', image: 'docker', command: 'cat', ttyEnabled: true)
   ],
@@ -9,7 +9,7 @@ podTemplate(label: 'mypod', containers: [
   ]
   ) {
 
-    node('mypod') {
+    node('aws-stash') {
 
         def myRepo = checkout scm
         def gitCommit = myRepo.GIT_COMMIT
