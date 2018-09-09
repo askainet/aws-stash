@@ -11,9 +11,13 @@ podTemplate(label: 'mypod', containers: [
     node('mypod') {
 
         def myRepo = checkout scm
+        def gitCommit = myRepo.GIT_COMMIT
+        def gitBranch = myRepo.GIT_BRANCH
+        def shortGitCommit = "${gitCommit[0..7]}"
 
         stage('Check running containers') {
             container('docker') {
+                echo "${shortGitCommit}"
                 sh "docker ps"
             }
         }
