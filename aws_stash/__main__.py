@@ -27,7 +27,9 @@ def main():
     import itertools
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('path', nargs='?', type=valid_path, help='Path to the parameter key or folder containing parameter keys')
+
+    parser.add_argument('--version', action='version', version='%(prog)s {}'.format(__version__), help='Show version')
+    parser.add_argument('path', type=valid_path, help='Path to the parameter key or folder containing parameter keys')
     parser.add_argument('-p', '--params', nargs='+', action='append', default=[], help='Parameter keys')
     parser.add_argument('-w', '--write', nargs='?', const='', help='Write parameter value, leave it empty to input it from STDIN')
     parser.add_argument('-m', '--multi-line', action='store_true', help='Accept multi-line value from STDIN, end input with CTRL+D')
@@ -42,23 +44,15 @@ def main():
     parser.add_argument('-q', '--quiet', action='store_true', help='Output only the values of the parameters')
     parser.add_argument('--full', action='store_true', help='Output fully qualified parameter path')
     parser.add_argument('-v', '--verbose', action='store_true', help='Output parameters details')
-    parser.add_argument('--version', action='store_true', help='Show version')
-    args = parser.parse_args()
 
-    if args.version:
-        print('{} {}'.format(__project_name__, __version__))
-        sys.exit(0)
-    elif args.path is None:
-        print('path is mandatory!\n')
-        parser.print_help()
-        sys.exit(1)
+    args = parser.parse_args()
 
     args.params = list(itertools.chain.from_iterable(args.params))
 
     param_store = ParamStore()
     output = Output()
 
-    if args.write:
+    if args.write is not None:
         version = param_store.write_parameter(
             path=args.path,
             value=args.write,
