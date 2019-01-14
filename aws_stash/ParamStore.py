@@ -130,7 +130,7 @@ class ParamStore:
         if description is None:
             parameter = self.get_parameter(path, verbose=True)
             if parameter:
-                description = parameter['Description']
+                description = parameter.get('Description', '')
             else:
                 description = ''
 
