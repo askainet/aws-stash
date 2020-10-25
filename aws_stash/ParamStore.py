@@ -16,8 +16,8 @@ class ParamStore:
     def get_parameter(self, path, verbose=False):
         try:
             if verbose:
-
-                paginator = self.ssm_client.get_paginator('get_parameter_history')
+                paginator = self.ssm_client.get_paginator(
+                    'get_parameter_history')
                 page_iterator = paginator.paginate(
                     Name=path,
                     WithDecryption=True
@@ -32,7 +32,6 @@ class ParamStore:
                     return None
 
             else:
-
                 response = self.ssm_client.get_parameter(
                     Name=path,
                     WithDecryption=True
@@ -95,8 +94,15 @@ class ParamStore:
 
         return parameters
 
-    def get_parameters(self, path, params=[], verbose=False):
+    def __match_param(self, path, params, full_name):
+        for p in params:
+            if full_name == path+'/'+p:
+                return p
+        return False
+
+    def get_parameters(self, path, params=[], find_in_parents=False, verbose=False):
         parameters = list()
+        found = list()
 
         paginator = self.ssm_client.get_paginator('get_parameters_by_path')
         page_iterator = paginator.paginate(
@@ -106,16 +112,32 @@ class ParamStore:
 
         for page in page_iterator:
             for parameter in page['Parameters']:
-                if len(params) and parameter['Name'].split('/')[-1] not in params:
-                    continue
+                if len(params):
+                    match = self.__match_param(path, params, parameter["Name"])
+                    if not match:
+                        continue
+                    found.append(match)
                 if verbose:
                     parameter = self.get_parameter(parameter['Name'], verbose)
                 parameters.append(parameter)
 
+        # try to get path as a parameter when no parameters requested
+        # and none were found using get_parameters_by_path
         if not len(parameters) and not len(params):
             parameter = self.get_parameter(path, verbose)
             if parameter:
                 parameters.append(parameter)
+
+        # try to any missing parameters in parent folders when requested
+        if find_in_parents and path != '/' and (
+                len(params) == len(parameters) == 0
+                or len(parameters) < len(params)):
+            if len(params):
+                params = list(set(params) - set(found))
+            path = '/' + '/'.join(path.split('/')[1:-1])
+            parameters += self.get_parameters(
+                path=path, params=params,
+                find_in_parents=find_in_parents, verbose=verbose)
 
         return parameters
 
@@ -145,7 +167,8 @@ class ParamStore:
             )
         except ClientError as e:
             if e.response['Error']['Code'] == 'ParameterAlreadyExists':
-                print('Parameter {0} already exists, use --force if you want to overwrite its value'.format(path))
+                print(
+                    'Parameter {0} already exists, use --force if you want to overwrite its value'.format(path))
                 return None
             else:
                 raise e
@@ -154,7 +177,8 @@ class ParamStore:
 
     def delete_parameters(self, path, recursive=False):
         if recursive:
-            list_params = self.list_parameters(path=path, recursive=recursive)
+            list_params = self.list_parameters(
+                path=path, recursive=recursive)
             parameters = [p['Name'] for p in list_params]
         else:
             parameters = [path]
@@ -163,5 +187,7 @@ class ParamStore:
             response = self.ssm_client.delete_parameters(
                 Names=parameters
             )
-            print('Deleted parameters: {0}'.format(response['DeletedParameters']))
-            print('Invalid parameters: {0}'.format(response['InvalidParameters']))
+            print('Deleted parameters: {0}'.format(
+                response['DeletedParameters']))
+            print('Invalid parameters: {0}'.format(
+                response['InvalidParameters']))
