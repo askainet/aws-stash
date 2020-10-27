@@ -1,31 +1,40 @@
 # -*- coding: utf-8 -*-
 
+import re
 import pyperclip
 
 
 class Output:
     def text(self, options, parameters):
         for parameter in parameters:
-            name = parameter['Name'] if options.full or options.list else parameter['Name'].split('/')[-1]
+            name = parameter['Name'] if options.full or options.list else parameter['Name'].split(
+                '/')[-1]
             if options.list:
                 print(name)
             elif options.quiet:
                 print(parameter['Value'])
             elif options.verbose:
-                print('{0}="{1}" version={2} description={3}'.format(name, parameter['Value'], parameter['Version'], parameter.get('Description')))
+                print('{0}="{1}" version={2} description={3}'.format(
+                    name, parameter['Value'], parameter['Version'], parameter.get('Description')))
             else:
                 print('{0}="{1}"'.format(name, parameter['Value']))
 
     def export(self, options, parameters):
+        invalid_chars = re.compile(r'[^a-zA-Z0-9_]')
+        invalid_first_char = re.compile(r'^([0-9])')
         for parameter in parameters:
-            name = parameter['Name'] if options.full or options.list else parameter['Name'].split('/')[-1]
+            name = parameter['Name'] if options.full or options.list else parameter['Name'].split(
+                '/')[-1]
+            name = invalid_chars.sub('_', name)
+            name = invalid_first_char.sub(r'_\1', name)
             print('export {0}="{1}"'.format(name, parameter['Value']))
 
     def json(self, options, parameters):
         import json
         output = dict()
         for parameter in parameters:
-            name = parameter['Name'] if options.full or options.list else parameter['Name'].split('/')[-1]
+            name = parameter['Name'] if options.full or options.list else parameter['Name'].split(
+                '/')[-1]
             if not options.list:
                 if options.verbose:
                     output[name] = {
